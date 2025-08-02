@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\ProductoController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,6 +20,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('proveedores', ProveedorController::class);
     Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     Route::post('/proveedores/undo-delete', [ProveedorController::class, 'undoDelete'])->name('proveedores.undoDelete');
+    Route::resource('productos', ProductoController::class)->middleware('auth');
+    Route::post('/productos/undo-delete', [ProductoController::class, 'undoDelete'])->name('productos.undoDelete');
 });
 
 
