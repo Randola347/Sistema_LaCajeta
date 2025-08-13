@@ -18,11 +18,12 @@
                 <span>🗑️ Se ha eliminado el producto <strong>{{ session('deleted') }}</strong>.</span>
                 <form method="POST" action="{{ route('productos.undoDelete') }}">
                     @csrf
-                    <input type="hidden" name="nombre" value="{{ session('deleted') }}">
                     <button type="submit" class="text-blue-600 hover:underline text-sm">Deshacer</button>
                 </form>
             </div>
         @endif
+
+
 
         <!-- Lista de productos -->
         @forelse ($productos as $producto)
@@ -58,7 +59,8 @@
                 position: fixed;
                 bottom: 1.5rem;
                 right: 1.5rem;
-                background-color: #16a34a; /* green-600 */
+                background-color: #16a34a;
+                /* green-600 */
                 color: white;
                 font-size: 1.75rem;
                 width: 3.5rem;
@@ -72,7 +74,8 @@
             }
 
             .boton-flotante:hover {
-                background-color: #15803d; /* green-700 */
+                background-color: #15803d;
+                /* green-700 */
             }
         </style>
     @endpush

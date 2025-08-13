@@ -31,7 +31,7 @@ class ProveedorController extends Controller
             'descripcion' => 'nullable|string',
         ]);
 
-        \App\Models\Proveedor::create($request->only('nombre', 'descripcion'));
+        Proveedor::create($request->only('nombre', 'descripcion'));
 
         return redirect()->route('proveedores.index')->with('success', 'Proveedor creado correctamente.');
     }
@@ -71,23 +71,39 @@ class ProveedorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $proveedor = Proveedor::findOrFail($id);
-        $nombre = $proveedor->nombre;
-        $proveedor->delete();
 
-        return redirect()->route('proveedores.index')->with('deleted', $nombre);
-    }
-    public function undoDelete(Request $request)
-    {
-        $nombre = $request->input('nombre');
-
-        Proveedor::create([
-            'nombre' => $nombre,
-            'descripcion' => 'Restaurado',
+        // Guardar datos en la sesión antes de eliminar
+        session([
+            'deleted_proveedor_data' => [
+                'nombre' => $proveedor->nombre,
+                'descripcion' => $proveedor->descripcion,
+            ]
         ]);
 
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor restaurado correctamente.');
+        $proveedor->delete();
+
+        return redirect()->route('proveedores.index')->with('deleted', $proveedor->nombre);
+    }
+
+    public function undoDelete(Request $request)
+    {
+        $data = session('deleted_proveedor_data');
+
+        if (!$data) {
+            return redirect()->route('proveedores.index')->with('error', 'No hay datos para restaurar.');
+        }
+
+        Proveedor::create([
+            'nombre' => $data['nombre'],
+            'descripcion' => $data['descripcion'],
+        ]);
+
+        // Limpiar la sesión
+        session()->forget('deleted_proveedor_data');
+
+        return redirect()->route('proveedores.index')->with('success', "Proveedor restaurado correctamente.");
     }
 }

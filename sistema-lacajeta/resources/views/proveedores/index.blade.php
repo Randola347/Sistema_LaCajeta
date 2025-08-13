@@ -18,11 +18,11 @@
                 <span>🗑️ Se ha eliminado el proveedor <strong>{{ session('deleted') }}</strong>.</span>
                 <form method="POST" action="{{ route('proveedores.undoDelete') }}">
                     @csrf
-                    <input type="hidden" name="nombre" value="{{ session('deleted') }}">
                     <button type="submit" class="text-blue-600 hover:underline text-sm">Deshacer</button>
                 </form>
             </div>
         @endif
+
 
         <!-- Lista de proveedores -->
         @forelse ($proveedores as $proveedor)
@@ -49,31 +49,32 @@
         @endforelse
     </div>
 
-   @push('scripts')
-    <style>
-        .boton-flotante {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            background-color: #16a34a; /* green-600 */
-            color: white;
-            font-size: 1.75rem;
-            width: 3.5rem;
-            height: 3.5rem;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 9999;
-        }
+    @push('scripts')
+        <style>
+            .boton-flotante {
+                position: fixed;
+                bottom: 1.5rem;
+                right: 1.5rem;
+                background-color: #16a34a;
+                /* green-600 */
+                color: white;
+                font-size: 1.75rem;
+                width: 3.5rem;
+                height: 3.5rem;
+                border-radius: 9999px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                z-index: 9999;
+            }
 
-        .boton-flotante:hover {
-            background-color: #15803d; /* green-700 */
-        }
-    </style>
-@endpush
+            .boton-flotante:hover {
+                background-color: #15803d;
+                /* green-700 */
+            }
+        </style>
+    @endpush
 
-<a href="{{ route('proveedores.create') }}" class="boton-flotante" title="Agregar proveedor">＋</a>
-
+    <a href="{{ route('proveedores.create') }}" class="boton-flotante" title="Agregar proveedor">＋</a>
 @endsection

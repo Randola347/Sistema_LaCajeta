@@ -19,4 +19,6 @@ class Producto extends Model
     {
         return $this->belongsTo(Proveedor::class);
     }
+
+        public $timestamps = false; // si no estás usando created_at y updated_at
 }

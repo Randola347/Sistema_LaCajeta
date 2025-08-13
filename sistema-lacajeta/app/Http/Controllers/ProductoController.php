@@ -56,11 +56,53 @@ class ProductoController extends Controller
         return redirect()->route('productos.index')->with('success', 'Producto actualizado correctamente.');
     }
 
-    public function destroy(Producto $producto)
+    public function destroy($id)
     {
-        $nombre = $producto->nombre;
+        $producto = Producto::with('proveedor')->findOrFail($id);
+
+        // Guardar datos completos en la sesión
+        session([
+            'deleted_producto_data' => [
+                'nombre' => $producto->nombre,
+                'descripcion' => $producto->descripcion,
+                'precio' => $producto->precio,
+                'inventario' => $producto->inventario,
+                'proveedor_nombre' => $producto->proveedor->nombre,
+            ]
+        ]);
+
         $producto->delete();
 
-        return redirect()->route('productos.index')->with('deleted', $nombre);
+        return redirect()->route('productos.index')->with('deleted', $producto->nombre);
+    }
+
+    public function undoDelete(Request $request)
+    {
+        $data = session('deleted_producto_data');
+
+        if (!$data) {
+            return redirect()->route('productos.index')->with('error', 'No hay datos para restaurar.');
+        }
+
+        // Buscar proveedor por nombre
+        $proveedor = Proveedor::where('nombre', $data['proveedor_nombre'])->first();
+
+        if (!$proveedor) {
+            return redirect()->route('productos.index')->with('error', 'Proveedor original no encontrado.');
+        }
+
+        // Restaurar producto
+        Producto::create([
+            'nombre' => $data['nombre'],
+            'descripcion' => $data['descripcion'],
+            'precio' => $data['precio'],
+            'inventario' => $data['inventario'],
+            'proveedor_id' => $proveedor->id,
+        ]);
+
+        // Limpiar sesión
+        session()->forget('deleted_producto_data');
+
+        return redirect()->route('productos.index')->with('success', "Producto restaurado correctamente.");
     }
 }
