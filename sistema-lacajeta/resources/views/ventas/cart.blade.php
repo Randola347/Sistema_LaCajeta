@@ -32,7 +32,8 @@
 
     {{-- Items --}}
     @forelse($items as $line)
-        <div class="bg-white rounded-xl shadow p-4 mb-3 flex flex-col gap-3" id="item-{{ $line['producto_id'] }}" data-id="{{ $line['producto_id'] }}">
+        <div class="bg-white rounded-xl shadow p-4 mb-3 flex flex-col gap-3"
+             id="item-{{ $line['producto_id'] }}" data-id="{{ $line['producto_id'] }}">
             <div class="flex justify-between items-center">
                 <div>
                     <p class="font-semibold text-gray-900">{{ $line['nombre'] }}</p>
@@ -59,7 +60,8 @@
         <div class="bg-white rounded-xl shadow p-6 text-center text-gray-500">Tu carrito está vacío.</div>
     @endforelse
 
-    {{-- Barra inferior --}}
+    {{-- Barra inferior (solo si hay items) --}}
+    @if(!empty($items))
     <div class="fixed left-0 right-0 bottom-0 sm:static bg-white sm:bg-transparent border-t sm:border-0">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-2">
             <div class="text-lg font-semibold text-gray-900">
@@ -80,6 +82,7 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 
 {{-- Modal checkout --}}
@@ -144,7 +147,7 @@
     </div>
 </div>
 
-{{-- JS para stepper y AJAX --}}
+{{-- JS para stepper, eliminar y modo --}}
 <script>
 document.addEventListener('click', async e => {
     // Stepper
@@ -186,7 +189,7 @@ document.addEventListener('click', async e => {
     }
 });
 
-// 🔹 función para actualizar badges (desktop + móvil)
+// 🔹 función para actualizar badges
 function updateBadges(count){
     const bd = document.getElementById('cart-badge-desktop');
     const bm = document.getElementById('cart-badge-mobile');
@@ -199,5 +202,23 @@ function updateBadges(count){
         else bm.classList.add('hidden');
     }
 }
+
+// 🔹 lógica para ocultar/mostrar inputs en modal
+document.addEventListener('DOMContentLoaded', () => {
+    const radios = document.querySelectorAll('input[name="modo"]');
+    const boxExistente = document.getElementById('boxExistente');
+    const boxNuevo = document.getElementById('boxNuevo');
+    const boxPago = document.getElementById('boxPago');
+
+    function sync() {
+        const val = document.querySelector('input[name="modo"]:checked')?.value;
+        boxExistente.classList.toggle('hidden', val !== 'deudor_existente');
+        boxNuevo.classList.toggle('hidden', val !== 'deudor_nuevo');
+        boxPago.classList.toggle('hidden', val !== 'sin_deudor');
+    }
+
+    radios.forEach(r => r.addEventListener('change', sync));
+    sync();
+});
 </script>
 @endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Deudor;
+use App\Models\Factura;
 use Illuminate\Http\Request;
 
 class DeudorController extends Controller
@@ -37,7 +38,7 @@ class DeudorController extends Controller
         Deudor::create($request->only('nombre', 'descripcion'));
 
         // Redirige de nuevo a la página anterior (facturas.pendientes)
-        return redirect()->back()->with('success', 'Deudor agregado correctamente.');
+        return redirect()->route('deudores.index')->with('success', 'Deudor agregado correctamente.');
     }
 
     /**
@@ -71,5 +72,14 @@ class DeudorController extends Controller
         $deudor->delete();
 
         return redirect()->route('deudores.index')->with('success', 'Deudor eliminado correctamente.');
+    }
+
+    public function marcarPagada($id)
+    {
+        $factura = Factura::findOrFail($id);
+        $factura->estado = 'Pagada';
+        $factura->save();
+
+        return back()->with('success', "Factura #{$factura->id} marcada como pagada.");
     }
 }

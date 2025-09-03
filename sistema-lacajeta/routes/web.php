@@ -7,9 +7,10 @@ use App\Http\Controllers\DeudorController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\VentasController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
@@ -32,8 +33,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/productos/undo-delete', [ProductoController::class, 'undoDelete'])->name('productos.undoDelete');
 
     /** Deudores */
-    Route::resource('deudores', DeudorController::class);
-    // ⚠️ si querés solo ciertos métodos, podés usar ->only([...]) o ->except([...])
+    Route::resource('deudores', DeudorController::class)
+        ->parameters(['deudores' => 'deudor']);
+
 
     /** Facturas */
     Route::get('/facturas/pendientes', [FacturaController::class, 'pendientes'])->name('facturas.pendientes');
@@ -63,6 +65,12 @@ Route::middleware('auth')->group(function () {
     // Actualizar productos de una factura desde el carrito (modo edición)
     Route::put('/facturas/{factura}/productos', [FacturaController::class, 'updateProductos'])
         ->name('facturas.updateProductos');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware(['auth', 'verified'])
+        ->name('dashboard');
+    Route::patch('/facturas/{id}/pagar', [DeudorController::class, 'marcarPagada'])->name('facturas.pagar');
+    Route::get('/facturas/{id}/imprimir', [FacturaController::class, 'imprimir'])
+        ->name('facturas.imprimir');
 });
 
 require __DIR__ . '/auth.php';

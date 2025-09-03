@@ -23,34 +23,40 @@
             </div>
         @endif
 
-
+        <!-- Buscador -->
+        <div class="mb-4">
+            <input type="text" id="search-producto" placeholder="Buscar producto..."
+                   class="border rounded px-3 py-2 w-full sm:w-80">
+        </div>
 
         <!-- Lista de productos -->
-        @forelse ($productos as $producto)
-            <div class="bg-white shadow-md rounded-xl p-4 mb-4 flex justify-between items-start">
-                <div>
-                    <p class="font-bold text-gray-800 text-lg">{{ $producto->nombre }}</p>
-                    <p class="text-sm text-gray-500">{{ $producto->descripcion }}</p>
-                    <p class="text-sm text-gray-500">💲 Precio: ₡{{ number_format($producto->precio, 2) }}</p>
-                    <p class="text-sm text-gray-500">📦 Inventario: {{ $producto->inventario }}</p>
-                    <p class="text-sm text-gray-500">👤 Proveedor: {{ $producto->proveedor->nombre }}</p>
-                </div>
+        <div id="productos-list">
+            @forelse ($productos as $producto)
+                <div class="bg-white shadow-md rounded-xl p-4 mb-4 flex justify-between items-start">
+                    <div>
+                        <p class="font-bold text-gray-800 text-lg">{{ $producto->nombre }}</p>
+                        <p class="text-sm text-gray-500">{{ $producto->descripcion }}</p>
+                        <p class="text-sm text-gray-500">💲 Precio: ₡{{ number_format($producto->precio, 2) }}</p>
+                        <p class="text-sm text-gray-500">📦 Inventario: {{ $producto->inventario }}</p>
+                        <p class="text-sm text-gray-500">👤 Proveedor: {{ $producto->proveedor->nombre }}</p>
+                    </div>
 
-                <div class="flex items-center space-x-8">
-                    <a href="{{ route('productos.edit', $producto) }}" class="text-blue-600 hover:text-blue-800 text-xl"
-                        title="Editar producto">✏️</a>
+                    <div class="flex items-center space-x-8">
+                        <a href="{{ route('productos.edit', $producto) }}" class="text-blue-600 hover:text-blue-800 text-xl"
+                           title="Editar producto">✏️</a>
 
-                    <form action="{{ route('productos.destroy', $producto) }}" method="POST"
-                        onsubmit="return confirm('¿Deseas eliminar este producto?')">
-                        @csrf
-                        @method('DELETE')
-                        <button class="text-red-600 hover:text-red-800 text-2xl" title="Eliminar producto">🗑️</button>
-                    </form>
+                        <form action="{{ route('productos.destroy', $producto) }}" method="POST"
+                              onsubmit="return confirm('¿Deseas eliminar este producto?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-600 hover:text-red-800 text-2xl" title="Eliminar producto">🗑️</button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        @empty
-            <p class="text-gray-500 text-center">No hay productos registrados aún.</p>
-        @endforelse
+            @empty
+                <p class="text-gray-500 text-center">No hay productos registrados aún.</p>
+            @endforelse
+        </div>
     </div>
 
     @push('scripts')
@@ -59,8 +65,7 @@
                 position: fixed;
                 bottom: 1.5rem;
                 right: 1.5rem;
-                background-color: #16a34a;
-                /* green-600 */
+                background-color: #16a34a; /* green-600 */
                 color: white;
                 font-size: 1.75rem;
                 width: 3.5rem;
@@ -74,11 +79,26 @@
             }
 
             .boton-flotante:hover {
-                background-color: #15803d;
-                /* green-700 */
+                background-color: #15803d; /* green-700 */
             }
         </style>
     @endpush
 
+    <!-- Botón flotante igual al de proveedores -->
     <a href="{{ route('productos.create') }}" class="boton-flotante" title="Agregar producto">＋</a>
+
+    {{-- Script buscador en tiempo real --}}
+    <script>
+        document.getElementById('search-producto').addEventListener('input', async e => {
+            const q = e.target.value;
+            const r = await fetch(`{{ route('productos.index') }}?q=${encodeURIComponent(q)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const html = await r.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newList = doc.getElementById('productos-list');
+            if (newList) document.getElementById('productos-list').innerHTML = newList.innerHTML;
+        });
+    </script>
 @endsection

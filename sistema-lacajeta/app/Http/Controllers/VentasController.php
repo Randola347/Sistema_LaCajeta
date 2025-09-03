@@ -188,6 +188,10 @@ class VentasController extends Controller
                     'precio_unitario' => $line['precio'],
                     'subtotal' => $line['precio'] * $line['cantidad'],
                 ]);
+                $producto = Producto::find($line['producto_id']);
+                if ($producto) {
+                    $producto->decrement('inventario', $line['cantidad']);
+                }
             }
             return $factura;
         });

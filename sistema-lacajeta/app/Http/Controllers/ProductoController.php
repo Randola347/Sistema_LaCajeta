@@ -8,9 +8,23 @@ use Illuminate\Http\Request;
 
 class ProductoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $productos = Producto::with('proveedor')->get();
+        $q = trim($request->get('q', ''));
+
+        $productos = Producto::with('proveedor')
+            ->when($q, function ($query) use ($q) {
+                $query->where('nombre', 'like', "%{$q}%")
+                      ->orWhere('descripcion', 'like', "%{$q}%");
+            })
+            ->orderBy('nombre')
+            ->get();
+
+        // Si es petición AJAX (buscador en tiempo real), devolver solo la lista
+        if ($request->ajax()) {
+            return view('productos.partials.list', compact('productos'))->render();
+        }
+
         return view('productos.index', compact('productos'));
     }
 
@@ -60,7 +74,6 @@ class ProductoController extends Controller
     {
         $producto = Producto::with('proveedor')->findOrFail($id);
 
-        // Guardar datos completos en la sesión
         session([
             'deleted_producto_data' => [
                 'nombre' => $producto->nombre,
@@ -84,14 +97,12 @@ class ProductoController extends Controller
             return redirect()->route('productos.index')->with('error', 'No hay datos para restaurar.');
         }
 
-        // Buscar proveedor por nombre
         $proveedor = Proveedor::where('nombre', $data['proveedor_nombre'])->first();
 
         if (!$proveedor) {
             return redirect()->route('productos.index')->with('error', 'Proveedor original no encontrado.');
         }
 
-        // Restaurar producto
         Producto::create([
             'nombre' => $data['nombre'],
             'descripcion' => $data['descripcion'],
@@ -100,7 +111,6 @@ class ProductoController extends Controller
             'proveedor_id' => $proveedor->id,
         ]);
 
-        // Limpiar sesión
         session()->forget('deleted_producto_data');
 
         return redirect()->route('productos.index')->with('success', "Producto restaurado correctamente.");

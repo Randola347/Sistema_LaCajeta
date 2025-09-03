@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin conexión</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 2rem;
+            background: #f9fafb;
+            color: #333;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        h1 {
+            color: #9333ea;
+        }
+        #countdown {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🚫 Sin conexión</h1>
+        <p>No tienes acceso a internet en este momento.</p>
+        <p>Te redirigiremos automáticamente cuando vuelvas a estar en línea.</p>
+        <p id="countdown">Reconectando en 5s...</p>
+        <button onclick="location.reload()">🔄 Reintentar ahora</button>
+    </div>
+
+    <script>
+        let counter = 5;
+        const el = document.getElementById("countdown");
+
+        function startCountdown() {
+            const interval = setInterval(() => {
+                counter--;
+                el.textContent = `Reconectando en ${counter}s...`;
+                if (counter <= 0) {
+                    clearInterval(interval);
+                    // Si ya hay conexión → recarga
+                    if (navigator.onLine) location.reload();
+                    else {
+                        // si aún no hay conexión, reinicia el contador
+                        counter = 5;
+                        startCountdown();
+                    }
+                }
+            }, 1000);
+        }
+        startCountdown();
+
+        // Si vuelve la conexión antes del contador, recarga de inmediato
+        window.addEventListener("online", () => location.reload());
+    </script>
+</body>
+</html>

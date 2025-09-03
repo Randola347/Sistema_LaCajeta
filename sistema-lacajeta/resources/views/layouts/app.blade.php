@@ -14,7 +14,19 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6b21a8">
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/serviceworker.js")
+                .then(() => console.log("Service Worker registrado"))
+                .catch(err => console.error("SW fallo:", err));
+        }
+    </script>
+
 </head>
+
+</script>
 
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
@@ -39,7 +51,18 @@
     </main>
     @stack('scripts')
 </body>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+            window.addEventListener('online', () => {
+                if (navigator.onLine) {
+                    reg.active.postMessage("online"); // ✅ avisamos al SW que ya hay internet
+                }
+            });
+        });
+    }
+</script>
 
-</body>
+
 
 </html>
